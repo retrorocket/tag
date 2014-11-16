@@ -11,8 +11,7 @@ use Encode;
 use Tumblr::API;
 use Mango;
 use Crypt::CBC;
-use Data::Dumper;
-use URI::Escape;
+use MIME::Base64;
 
 Date_Init("TZ=JST");
 
@@ -58,8 +57,8 @@ while (my $elem = $collection->next) {
 		#twitter
 		my $d_access_token =  $elem->{tw_access_token};
 		my $d_access_token_secret = $elem->{tw_access_token_secret};
-		my $access_token = $cipher->decrypt(uri_unescape($d_access_token));
-		my $access_token_secret = $cipher->decrypt(uri_unescape($d_access_token_secret));
+		my $access_token = $cipher->decrypt(MIME::Base64::decode_base64($d_access_token));
+		my $access_token_secret = $cipher->decrypt(MIME::Base64::decode_base64($d_access_token_secret));
 
 		$twit->access_token($access_token);
 		$twit->access_token_secret($access_token_secret);
@@ -67,8 +66,8 @@ while (my $elem = $collection->next) {
 		#Tumblr
 		my $d_tb_access_token =  $elem->{tb_access_token};
 		my $d_tb_access_token_secret = $elem->{tb_access_token_secret};
-		my $tb_access_token = $cipher->decrypt(uri_unescape($d_tb_access_token));
-		my $tb_access_token_secret = $cipher->decrypt(uri_unescape($d_tb_access_token_secret));
+		my $tb_access_token = $cipher->decrypt(MIME::Base64::decode_base64($d_tb_access_token));
+		my $tb_access_token_secret = $cipher->decrypt(MIME::Base64::decode_base64($d_tb_access_token_secret));
 
 		$tb->{token} = $tb_access_token;
 		$tb->{token_secret} = $tb_access_token_secret;

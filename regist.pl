@@ -11,7 +11,7 @@ use Crypt::CBC;
 use Tumblr::API;
 use Net::Twitter::Lite::WithAPIv1_1;
 use Mojolicious::Lite;
-use URI::Escape;
+use MIME::Base64;
 
 helper mango  => sub { state $mango = Mango->new("mongodb://localhost:***") };
 helper pastes => sub { shift->mango->db('xxx')->collection('xxx') };
@@ -208,7 +208,7 @@ get '/auth_cb' => sub {
 	my ($access_token, $access_token_secret) =
 		$tb->get_access_token( oauth_verifier => $verifier );
 
-	# ハッシュ化
+	# 暗号化
 	my $s_access_token = $cipher->encrypt($access_token);
 	my $s_access_token_secret = $cipher->encrypt($access_token_secret);
 
@@ -226,7 +226,7 @@ get '/auth_cb' => sub {
 		);
 	}
 
-	#ハッシュ化
+	# 暗号化
 	my $s_access_token_twitter = $cipher->encrypt($access_token_twitter);
 	my $s_access_token_secret_twitter = $cipher->encrypt($access_token_secret_twitter);
 
@@ -236,10 +236,10 @@ get '/auth_cb' => sub {
 	my $array = $nt->user_timeline({count => 1});
 	my $since_id = $array->[0]->{id_str};
 	my $access_tokens  =  {
-		tw_access_token => uri_escape($s_access_token_twitter),
-		tw_access_token_secret =>  uri_escape($s_access_token_secret_twitter),
-		tb_access_token =>  uri_escape($s_access_token),
-		tb_access_token_secret =>  uri_escape($s_access_token_secret),
+		tw_access_token => MIME::Base64::encode_base64($s_access_token_twitter),
+		tw_access_token_secret => MIME::Base64::encode_base64($s_access_token_secret_twitter),
+		tb_access_token => MIME::Base64::encode_base64($s_access_token),
+		tb_access_token_secret => MIME::Base64::encode_base64($s_access_token_secret),
 		user_id => $user_id,
 		base_hostname => $base_hostname,
 		target => $target,
